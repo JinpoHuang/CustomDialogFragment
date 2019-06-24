@@ -1,6 +1,7 @@
 package com.jinpo.customdialoglibrary;
 
 import android.app.AlertDialog;
+import android.support.annotation.LayoutRes;
 import android.support.v4.app.DialogFragment;
 import android.view.View;
 
@@ -13,6 +14,7 @@ import android.view.View;
 
 public class CustomDialogFragment extends BaseDialogFragment {
     private AlertDialog.Builder builder;//系统默认弹窗
+    @LayoutRes
     private int layoutID = View.NO_ID;//自定义弹窗布局
     private DialogContentListener contentListener;//自定义弹窗处理事件接口
 
@@ -24,7 +26,7 @@ public class CustomDialogFragment extends BaseDialogFragment {
     }
 
     //创建自定义弹窗
-    public static CustomDialogFragment newInstance(int layoutID,DialogContentListener contentListener) {
+    public static CustomDialogFragment newInstance(@LayoutRes int layoutID, DialogContentListener contentListener) {
         CustomDialogFragment customDialogFragment=new CustomDialogFragment();
         customDialogFragment.layoutID=layoutID;
         customDialogFragment.contentListener =contentListener;

@@ -8,7 +8,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author：jinpo_huang
@@ -25,6 +28,8 @@ public class CustomDialogManage {
     private int lodingLayoutID = R.layout.layout_loading;
     private BaseDialogFragment.DialogCancelListener dialogCancelListener;//监听弹窗关闭
 
+    private CopyOnWriteArrayList<BaseDialogFragment> dialogFragmentList;//弹窗队列，管理已开启弹窗
+
     public CustomDialogManage(AppCompatActivity activity) {
         this.activity = activity;
         fragmentManager = activity.getSupportFragmentManager();
@@ -38,32 +43,49 @@ public class CustomDialogManage {
     }
 
     private void init() {
+        dialogFragmentList = new CopyOnWriteArrayList<>();
         lodingDialog = getLodingDialog();
         //监听弹窗关闭
-        dialogCancelListener=new BaseDialogFragment.DialogCancelListener() {
+        dialogCancelListener = new BaseDialogFragment.DialogCancelListener() {
             @Override
             public void onCancel(DialogFragment dialogFragment) {
                 Log.i(TAG, "touch or back dissmiss dialog: " + dialogFragment);
+                if (dialogFragmentList.size() > 0) {
+                    dialogFragmentList.remove(dialogFragment);//移除弹窗队列
+                }
             }
         };
     }
 
     //显示弹窗的方法
-    public void showDialog(BaseDialogFragment dialogFragment) {
-        if (dialogFragment == null) {
-            Log.w(TAG, "dFragment is null.");
-            return;
-        }
+    private void show(BaseDialogFragment dialogFragment) {
+        dialogFragmentList.add(dialogFragment);//添加到弹窗队列
         Log.i(TAG, "showDialog: " + dialogFragment);
         dialogFragment.setDialogCancelListener(dialogCancelListener);
         dialogFragment.show(fragmentManager, dialogFragment.getTag());
     }
 
-    //关闭弹窗的方法
-    public void dismissDialog(BaseDialogFragment dialogFragment) {
+    //去重，同一个弹窗只能显示一次
+    private void removalDialog(BaseDialogFragment dialogFragment) {
+        if (dialogFragmentList.contains(dialogFragment)) {
+            dismissDialog(dialogFragment);
+        }
+    }
+
+    //显示弹窗的方法（去重）
+    public void showDialog(BaseDialogFragment dialogFragment) {
         if (dialogFragment == null) {
             Log.w(TAG, "dFragment is null.");
             return;
+        }
+        removalDialog(dialogFragment);
+        show(dialogFragment);
+    }
+
+    //关闭弹窗的方法
+    public void dismissDialog(BaseDialogFragment dialogFragment) {
+        if (dialogFragmentList.size() > 0) {
+            dialogFragmentList.remove(dialogFragment);//移除弹窗队列
         }
         Log.i(TAG, "dismissDialog: " + dialogFragment);
         dialogFragment.dismiss();
@@ -74,35 +96,57 @@ public class CustomDialogManage {
         showDialog(lodingDialog);
         return lodingDialog;
     }
+
     //关闭加载弹窗
     public void dismissLoadingDialog() {
         dismissDialog(lodingDialog);
     }
 
-
+    //关闭所有弹窗
+    public void dismissAllDialog(){
+        for (BaseDialogFragment dialogFragment : dialogFragmentList) {
+            dismissDialog(dialogFragment);
+        }
+        dialogFragmentList.clear();
+    }
 
     //显示系统弹窗
-    public BaseDialogFragment showSystemDialog(CharSequence title, CharSequence message, CharSequence noText, DialogInterface.OnClickListener noListener, CharSequence yesText, DialogInterface.OnClickListener yesListener){
-        CustomDialogFragment dialogFragment=CustomDialogFragment.newInstance(
+    public BaseDialogFragment showSystemDialog(CharSequence title, CharSequence message, CharSequence noText, DialogInterface.OnClickListener noListener, CharSequence yesText, DialogInterface.OnClickListener yesListener) {
+        CustomDialogFragment dialogFragment = CustomDialogFragment.newInstance(
                 new AlertDialog.Builder(activity).setTitle(title).setMessage(message)
-                        .setNegativeButton(noText,noListener)
-                        .setPositiveButton(yesText,yesListener));
+                        .setNegativeButton(noText, noListener)
+                        .setPositiveButton(yesText, yesListener));
+        showDialog(dialogFragment);
+        return dialogFragment;
+    }
+
+    //显示自定义布局的系统弹窗
+    public BaseDialogFragment showSystemDialog(int layoutID) {
+        View view=activity.getLayoutInflater().inflate(layoutID,null);
+        CustomDialogFragment dialogFragment = CustomDialogFragment.newInstance(
+                new AlertDialog.Builder(activity).setView(view).setPositiveButton("",null).setNegativeButton("",null));
         showDialog(dialogFragment);
         return dialogFragment;
     }
 
 
 
-    //
+    //获取加载弹窗
     private CustomDialogFragment getLodingDialog() {
-//        int width = activity.getResources().getDisplayMetrics().widthPixels;
+        //int width = activity.getResources().getDisplayMetrics().widthPixels;
         CustomDialogFragment dialogFragment = CustomDialogFragment.newInstance(lodingLayoutID, new DialogContentListener() {
             @Override
             public void onContentView(ViewHolder viewHolder, DialogFragment dialogFragment) {
 
             }
         });
-        dialogFragment.setIsCanceledOnTouchOutside(false).setTransparent(true).setDimAmount(0.3f).setWidth(ViewGroup.LayoutParams.MATCH_PARENT).setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+        dialogFragment.setIsCanceledOnTouchOutside(false).setTransparent(true).setDimAmount(0.3f)
+                .setWidth(ViewGroup.LayoutParams.MATCH_PARENT).setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
         return dialogFragment;
+    }
+
+    public void setLodingLayoutID(int lodingLayoutID) {
+        this.lodingLayoutID = lodingLayoutID;
+        lodingDialog = getLodingDialog();
     }
 }
