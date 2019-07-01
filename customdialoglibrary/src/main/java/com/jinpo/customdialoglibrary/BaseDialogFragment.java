@@ -24,9 +24,8 @@ import android.view.WindowManager;
  * @function：
  */
 
-public abstract class BaseDialogFragment extends DialogFragment implements DialogContentListener{
+public abstract class BaseDialogFragment extends DialogFragment implements DialogContentListener {
     private static final String TAG = "BaseDialogFragment";
-
     //DialogFragment常用属性
     private Boolean isCancelable = true;//能否通过空白或返回键关闭弹窗
     private Boolean isCanceledOnTouchOutside = true;//能否通过点击空白关闭弹窗
@@ -99,7 +98,7 @@ public abstract class BaseDialogFragment extends DialogFragment implements Dialo
     //方便链式设置弹窗属性
     public BaseDialogFragment setIsCancelable(Boolean cancelable) {
         isCancelable = cancelable;
-        if(getDialog()!=null){
+        if (getDialog() != null) {
             setCancelable(isCancelable);
         }
         return this;
@@ -112,13 +111,14 @@ public abstract class BaseDialogFragment extends DialogFragment implements Dialo
         }
         return this;
     }
+
     public BaseDialogFragment setTransparent(Boolean transparent) {
         isTransparent = transparent;
         return this;
     }
 
     public BaseDialogFragment setDimAmount(float dimAmount) {
-        if(dimAmount<0||dimAmount>1){
+        if (dimAmount < 0 || dimAmount > 1) {
             Log.w(TAG, "dimAmount ranges from 0 to 1");
             return this;
         }
@@ -149,15 +149,15 @@ public abstract class BaseDialogFragment extends DialogFragment implements Dialo
     public void show(FragmentManager manager, String tag) {
         try {
             super.show(manager, tag);
-        }catch (Exception e){
-            Log.w(TAG,"show:"+e);
+        } catch (Exception e) {
+            Log.w(TAG, "show:" + e);
         }
     }
 
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
-        if(dialogCancelListener!=null){
+        if (dialogCancelListener != null) {
             dialogCancelListener.onCancel(this);
         }
     }

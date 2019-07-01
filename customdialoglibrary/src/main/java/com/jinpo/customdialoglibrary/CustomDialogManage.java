@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -22,6 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CustomDialogManage {
     private static final String TAG = "CustomDialogManage";
+    int widthPixels,heightPixels;
     private FragmentManager fragmentManager;
     private Activity activity;
     private CustomDialogFragment lodingDialog;
@@ -43,6 +43,8 @@ public class CustomDialogManage {
     }
 
     private void init() {
+        widthPixels=activity.getResources().getDisplayMetrics().widthPixels;
+        heightPixels=activity.getResources().getDisplayMetrics().heightPixels;
         dialogFragmentList = new CopyOnWriteArrayList<>();
         lodingDialog = getLodingDialog();
         //监听弹窗关闭
@@ -133,7 +135,6 @@ public class CustomDialogManage {
 
     //获取加载弹窗
     private CustomDialogFragment getLodingDialog() {
-        //int width = activity.getResources().getDisplayMetrics().widthPixels;
         CustomDialogFragment dialogFragment = CustomDialogFragment.newInstance(lodingLayoutID, new DialogContentListener() {
             @Override
             public void onContentView(ViewHolder viewHolder, DialogFragment dialogFragment) {
@@ -141,7 +142,7 @@ public class CustomDialogManage {
             }
         });
         dialogFragment.setIsCanceledOnTouchOutside(false).setTransparent(true).setDimAmount(0.3f)
-                .setWidth(ViewGroup.LayoutParams.MATCH_PARENT).setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+                .setWidth(widthPixels).setHeight(heightPixels);
         return dialogFragment;
     }
 

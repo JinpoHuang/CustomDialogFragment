@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.jinpo.customdialoglibrary.CustomDialogFragment;
 import com.jinpo.customdialoglibrary.CustomDialogManage;
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
                         viewHolder.setTextViewText(R.id.tv_dialog, "这是一个自定义布局弹窗");
                     }
                 });
+                dialogFragment.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+                dialogFragment.setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
                 dialogManage.showDialog(dialogFragment);
                 break;
 
